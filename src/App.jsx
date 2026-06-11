@@ -454,6 +454,8 @@ function SkitTimerScreen({ onBack }) {
   const [timeLeft, setTimeLeft] = useState(TIMER_DUR);
   const [running, setRunning] = useState(false);
   const [skitDone, setSkitDone] = useState(false);
+  const [numGroups, setNumGroups] = useState(10);
+  const [groupAssignments, setGroupAssignments] = useState([]);
   const tickRef = useRef(null);
 
   const skit = SKITS[skitIdx];
@@ -475,9 +477,6 @@ function SkitTimerScreen({ onBack }) {
   };
 
   const reset = () => { clearTimeout(tickRef.current); setPhase("pick"); setScenario(null); setSkitIdx(0); setTimeLeft(TIMER_DUR); setRunning(false); setSkitDone(false); };
-
-  const [numGroups, setNumGroups] = useState(10);
-  const [groupAssignments, setGroupAssignments] = useState([]);
 
   const assignScenarios = () => {
     const shuffled = [...SCENARIOS].sort(() => Math.random() - 0.5);
