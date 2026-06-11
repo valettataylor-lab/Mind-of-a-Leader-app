@@ -78,18 +78,23 @@ const QUESTIONS = [
 ];
 
 const GROUP_ROLES = [
-  { count:5, label:"The Cast",     icon:"🎭", color:C.coral,    desc:"Perform all three skits — the real reaction, the strong response, and the support moment.", tip:"Bring drama, humor, and truth. All of it counts." },
-  { count:2, label:"The Hosts",    icon:"🎤", color:C.sky,      desc:"Introduce the scenario to the room and narrate what's happening between skits.",            tip:"You're the voice of the group. Keep everyone oriented." },
-  { count:2, label:"The Analysts", icon:"📊", color:C.teal,     desc:"After the skits, break down what changed from Skit 1 to Skit 2 — and why it mattered.",     tip:"What shifted? What worked? Name the difference." },
-  { count:1, label:"The Scout",    icon:"🔭", color:C.lavender, desc:"Silent observer during the performance. Speaks last — sharing what nobody else noticed.",    tip:"Stay quiet. Watch everything. You catch what the cameras missed." },
+  { count:"3–4", label:"The Cast",     icon:"🎭", color:C.coral,    desc:"Perform all three skits — the real reaction, the strong response, and the support moment.", tip:"Bring drama, humor, and truth. All of it counts." },
+  { count:1,     label:"The Host",     icon:"🎤", color:C.sky,      desc:"Introduce the scenario to the room and narrate what's happening between each skit.",       tip:"You're the voice of the group. Keep everyone oriented." },
+  { count:1,     label:"The Analyst",  icon:"📊", color:C.teal,     desc:"After the skits, break down what changed from Skit 1 to Skit 2 — and why it mattered.",    tip:"What shifted? What worked? Name the difference." },
+  { count:1,     label:"The Scout",    icon:"🔭", color:C.lavender, desc:"Silent observer during the performance. Speaks last — sharing what nobody else noticed.",   tip:"Stay quiet. Watch everything. You catch what the cameras missed." },
 ];
 
 const SCENARIOS = [
-  { id:1, color:C.sky,      sym:"★", label:"Sky Blue / Star",   text:"You studied hard and still failed an important test." },
-  { id:2, color:C.coral,    sym:"⚡", label:"Coral / Bolt",      text:"You didn't make the team or club you really wanted." },
-  { id:3, color:C.teal,     sym:"♥", label:"Teal / Heart",      text:"Your friend group is falling apart and you're caught in the middle." },
-  { id:4, color:C.gold,     sym:"◆", label:"Gold / Diamond",    text:"You feel pressure to be someone you're not." },
-  { id:5, color:C.lavender, sym:"●", label:"Lavender / Circle", text:"Someone posted something about you online." },
+  { id:1,  color:C.sky,      sym:"★", label:"Sky Blue / Star",    text:"You studied hard and still failed an important test." },
+  { id:2,  color:C.coral,    sym:"⚡", label:"Coral / Bolt",       text:"You didn't make the team or club you really wanted." },
+  { id:3,  color:C.teal,     sym:"♥", label:"Teal / Heart",       text:"Your friend group is falling apart and you're caught in the middle." },
+  { id:4,  color:C.gold,     sym:"◆", label:"Gold / Diamond",     text:"You feel pressure to be someone you're not." },
+  { id:5,  color:C.lavender, sym:"●", label:"Lavender / Circle",  text:"Someone posted something about you online." },
+  { id:6,  color:"#E8A838",  sym:"♛", label:"Amber / Crown",      text:"You got left out of something everyone else was invited to." },
+  { id:7,  color:"#3BAF7E",  sym:"▲", label:"Emerald / Triangle", text:"Someone you trusted shared something you told them in private." },
+  { id:8,  color:"#D45C8A",  sym:"✦", label:"Rose / Spark",       text:"You worked harder than anyone but someone else got the credit." },
+  { id:9,  color:"#5B9BD5",  sym:"◎", label:"Steel / Ring",       text:"You're the only one who thinks something is wrong — and no one believes you." },
+  { id:10, color:"#A67BC8",  sym:"☾", label:"Plum / Moon",        text:"You made a mistake in front of everyone and now you can't stop thinking about it." },
 ];
 
 const SKITS = [
@@ -319,11 +324,12 @@ function drawBackCard(canvas) {
 function HomeScreen({ onNav }) {
   const tiles = [
     { key:"standsit",   icon:"🙋", title:"Stand / Sit",     sub:"12-question energy check",           color:C.sky      },
-    { key:"grouproles", icon:"🎭", title:"Group Roles",     sub:"Cast · Hosts · Analysts · Scout",    color:C.coral    },
-    { key:"skittimer",  icon:"⏱", title:"Skit Timer",      sub:"Simultaneous countdown + debrief",   color:C.teal     },
-    { key:"ecoref",     icon:"🌐", title:"Role Reference",  sub:"What each of the 6 roles means",     color:C.gold     },
-    { key:"ecosystem",  icon:"⭕", title:"Build My Circle", sub:"Name your 6-role ecosystem",         color:C.lavender },
-    { key:"pocketcard", icon:"📲", title:"Pocket Card",     sub:"Download your take-home card",       color:C.rose     },
+    { key:"lottery",    icon:"🎲", title:"Draw My Group",   sub:"Lottery — find your group number",   color:C.gold     },
+    { key:"grouproles", icon:"🎭", title:"Group Roles",     sub:"Cast · Host · Analyst · Scout",      color:C.coral    },
+    { key:"skittimer",  icon:"⏱", title:"Skit Timer",      sub:"Assign scenarios + countdown",       color:C.teal     },
+    { key:"ecoref",     icon:"🌐", title:"Role Reference",  sub:"What each of the 6 roles means",     color:C.lavender },
+    { key:"ecosystem",  icon:"⭕", title:"Build My Circle", sub:"Name your 6-role ecosystem",         color:C.rose     },
+    { key:"pocketcard", icon:"📲", title:"Pocket Card",     sub:"Download your take-home card",       color:C.sky      },
   ];
 
   return (
@@ -470,25 +476,63 @@ function SkitTimerScreen({ onBack }) {
 
   const reset = () => { clearTimeout(tickRef.current); setPhase("pick"); setScenario(null); setSkitIdx(0); setTimeLeft(TIMER_DUR); setRunning(false); setSkitDone(false); };
 
+  const [numGroups, setNumGroups] = useState(10);
+  const [groupAssignments, setGroupAssignments] = useState([]);
+
+  const assignScenarios = () => {
+    const shuffled = [...SCENARIOS].sort(() => Math.random() - 0.5);
+    const assignments = Array.from({ length: numGroups }, (_, i) => ({
+      group: i + 1,
+      scenario: shuffled[i % shuffled.length],
+    }));
+    setGroupAssignments(assignments);
+    setPhase("assignments");
+  };
+
   if (phase === "pick") return (
     <div style={{ background:C.navy, minHeight:"100vh", paddingBottom:44 }}>
       <BackBtn onBack={onBack} />
       <div style={{ padding:"4px 22px 0" }}>
         <div style={{ fontFamily:"'Playfair Display',serif", fontSize:30, fontWeight:900, color:C.white, marginBottom:6 }}>Skit Timer</div>
-        <div style={{ fontSize:13, color:rgba(C.white,.45), marginBottom:24 }}>Reveal a scenario, then start all groups simultaneously</div>
-        {SCENARIOS.map(s => (
-          <button key={s.id} onClick={() => setScenario(prev=>prev?.id===s.id?null:s)} style={{ width:"100%", marginBottom:10, padding:scenario?.id===s.id?"16px 18px":"14px 18px", background:scenario?.id===s.id?rgba(s.color,.15):rgba(s.color,.06), border:`1px solid ${rgba(s.color,scenario?.id===s.id?.5:.18)}`, borderRadius:12, textAlign:"left", cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"all .18s ease" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-              <span style={{ fontSize:22, color:s.color, minWidth:28, textAlign:"center" }}>{s.sym}</span>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:10, color:s.color, fontWeight:700, letterSpacing:1.5, textTransform:"uppercase", marginBottom:scenario?.id===s.id?6:0 }}>{s.label}</div>
-                {scenario?.id===s.id&&<div style={{ fontSize:14, color:C.white, lineHeight:1.5, animation:"fadeIn .2s ease" }}>{s.text}</div>}
-              </div>
-              {scenario?.id===s.id&&<span style={{ color:s.color }}>✓</span>}
+        <div style={{ fontSize:13, color:rgba(C.white,.45), marginBottom:20 }}>Assign scenarios to groups, then start simultaneously</div>
+
+        {/* Group count picker */}
+        <div style={{ background:rgba(C.white,.04), border:`1px solid ${rgba(C.white,.1)}`, borderRadius:14, padding:"16px 20px", marginBottom:20 }}>
+          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:rgba(C.white,.4), marginBottom:10 }}>Number of Groups</div>
+          <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+            <button onClick={() => setNumGroups(n=>Math.max(2,n-1))} style={{ width:38, height:38, borderRadius:"50%", border:`1px solid ${rgba(C.white,.2)}`, background:"none", color:C.white, fontSize:20, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>−</button>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:40, fontWeight:900, color:C.gold, minWidth:40, textAlign:"center" }}>{numGroups}</div>
+            <button onClick={() => setNumGroups(n=>Math.min(12,n+1))} style={{ width:38, height:38, borderRadius:"50%", border:`1px solid ${rgba(C.white,.2)}`, background:"none", color:C.white, fontSize:20, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>+</button>
+            <div style={{ fontSize:12, color:rgba(C.white,.35), lineHeight:1.5 }}>Morning: 10<br/>Afternoon: 10</div>
+          </div>
+        </div>
+
+        <button onClick={assignScenarios} style={{ width:"100%", padding:"18px", background:C.gold, border:"none", borderRadius:14, color:C.navy, fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", marginBottom:10 }}>
+          🎲 Assign Scenarios to All Groups
+        </button>
+        <div style={{ textAlign:"center", fontSize:12, color:rgba(C.white,.3) }}>Each group gets a different scenario randomly</div>
+      </div>
+    </div>
+  );
+
+  if (phase === "assignments") return (
+    <div style={{ background:C.navy, minHeight:"100vh", paddingBottom:44 }}>
+      <button onClick={() => setPhase("pick")} style={{ background:"none", border:"none", cursor:"pointer", color:rgba(C.white,.4), fontSize:13, fontWeight:600, padding:"18px 22px 10px", fontFamily:"'DM Sans',sans-serif" }}>← Reassign</button>
+      <div style={{ padding:"4px 22px 0" }}>
+        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:26, fontWeight:900, color:C.white, marginBottom:4 }}>Group Scenarios</div>
+        <div style={{ fontSize:13, color:rgba(C.white,.45), marginBottom:16 }}>Show this on the projector — each group finds theirs</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:16 }}>
+          {groupAssignments.map(({ group, scenario: s }) => (
+            <div key={group} style={{ background:rgba(s.color,.1), border:`1px solid ${rgba(s.color,.3)}`, borderRadius:12, padding:"12px 14px" }}>
+              <div style={{ fontSize:10, fontWeight:700, letterSpacing:1.5, textTransform:"uppercase", color:s.color, marginBottom:4 }}>Group {group}</div>
+              <div style={{ fontSize:18, marginBottom:4 }}>{s.sym}</div>
+              <div style={{ fontSize:11, color:rgba(C.white,.6), lineHeight:1.45 }}>{s.text}</div>
             </div>
-          </button>
-        ))}
-        {scenario&&<button onClick={() => { setPhase("timer"); setRunning(true); }} style={{ width:"100%", marginTop:6, padding:"18px", background:C.teal, border:"none", borderRadius:14, color:C.white, fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", animation:"scaleIn .2s ease" }}>▶ Start All Groups Simultaneously</button>}
+          ))}
+        </div>
+        <button onClick={() => { setPhase("timer"); setRunning(true); }} style={{ width:"100%", padding:"18px", background:C.teal, border:"none", borderRadius:14, color:C.white, fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+          ▶ Start All Groups Simultaneously
+        </button>
       </div>
     </div>
   );
@@ -757,6 +801,7 @@ export default function App() {
   const screens = {
     home:       <HomeScreen onNav={nav} />,
     standsit:   <StandSitScreen onBack={()=>nav("home")} />,
+    lottery:    <LotteryScreen onBack={()=>nav("home")} />,
     grouproles: <GroupRolesScreen onBack={()=>nav("home")} />,
     skittimer:  <SkitTimerScreen onBack={()=>nav("home")} />,
     ecoref:     <EcoRefScreen onBack={()=>nav("home")} onBuild={()=>nav("ecosystem")} />,
