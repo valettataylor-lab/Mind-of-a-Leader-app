@@ -113,7 +113,7 @@ const ROLES = [
   { id:"sponsor",   label:"Sponsor",     title:"The Door Opener", abbr:"S",  icon:"🚪", color:C.lavender, hint:"e.g. someone who recommends you",   line:"opens the doors",      def:"Talks about you when you're not in the room. Opens doors you couldn't open yourself." },
 ];
 
-const APP_URL = "https://valettataylor.com/leader"; // ← swap to Netlify URL before event
+const APP_URL = "https://mindofaleader2026.netlify.app"; // ← swap to Netlify URL before event
 const TIMER_DUR = 45;
 const CIRC = 2 * Math.PI * 45;
 
@@ -336,6 +336,19 @@ function HomeScreen({ onNav }) {
         <div style={{ fontSize:13, color:rgba(C.white,.4), letterSpacing:.5 }}>Grit · Emotional Intelligence · Mental Fortitude</div>
       </div>
       <div style={{ padding:"28px 18px 0" }}>
+
+        {/* Welcome Banner */}
+        <div style={{ background:`linear-gradient(135deg,${rgba(C.gold,.1)} 0%,${rgba(C.teal,.08)} 100%)`, border:`1px solid ${rgba(C.gold,.28)}`, borderRadius:16, padding:"18px 20px", marginBottom:20 }}>
+          <div style={{ fontSize:10, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:C.gold, marginBottom:8 }}>👋 Welcome</div>
+          <div style={{ fontSize:15, color:C.white, fontWeight:600, lineHeight:1.5, marginBottom:6 }}>You're in the right place.</div>
+          <div style={{ fontSize:13, color:rgba(C.white,.65), lineHeight:1.7 }}>
+            Hold tight — <strong style={{ color:C.white }}>don't tap anything yet.</strong> Your facilitator will guide you to each screen as the session moves forward.
+          </div>
+          <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${rgba(C.gold,.15)}`, fontSize:12, color:rgba(C.gold,.7), fontStyle:"italic", lineHeight:1.6 }}>
+            "Your mindset isn't tested on your best day. It's tested on your hardest one."
+          </div>
+        </div>
+
         <div style={{ fontSize:10, fontWeight:700, letterSpacing:2.5, textTransform:"uppercase", color:rgba(C.white,.3), marginBottom:14 }}>Session Tools</div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:11 }}>
           {tiles.map(t => (
