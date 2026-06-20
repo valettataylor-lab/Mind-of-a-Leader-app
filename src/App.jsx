@@ -410,6 +410,105 @@ function StandSitScreen({ onBack }) {
   );
 }
 
+
+// ─── LOTTERY SCREEN ──────────────────────────────────────────────────
+function LotteryScreen({ onBack }) {
+  const [numGroups, setNumGroups] = useState(10);
+  const [phase, setPhase] = useState("setup");
+  const [result, setResult] = useState(null);
+  const [displayNum, setDisplayNum] = useState(1);
+  const spinRef = useRef(null);
+
+  const groupColors = [
+    C.sky, C.coral, C.teal, C.gold, C.lavender,
+    "#E8A838", "#3BAF7E", "#D45C8A", "#5B9BD5", "#A67BC8"
+  ];
+
+  const spin = () => {
+    setPhase("spinning");
+    setResult(null);
+    let count = 0;
+    const total = 20;
+    const final = Math.floor(Math.random() * numGroups) + 1;
+    const tick = () => {
+      count++;
+      setDisplayNum(Math.floor(Math.random() * numGroups) + 1);
+      if (count < total) {
+        spinRef.current = setTimeout(tick, count < 12 ? 60 : count < 17 ? 100 : 180);
+      } else {
+        setDisplayNum(final);
+        setResult(final);
+        setPhase("result");
+      }
+    };
+    spinRef.current = setTimeout(tick, 60);
+  };
+
+  useEffect(() => () => clearTimeout(spinRef.current), []);
+
+  const groupColor = result ? groupColors[(result - 1) % groupColors.length] : C.gold;
+  const scenario = result ? SCENARIOS[(result - 1) % SCENARIOS.length] : null;
+
+  return (
+    <div style={{ background:C.navy, minHeight:"100vh", display:"flex", flexDirection:"column" }}>
+      <BackBtn onBack={onBack} />
+      <div style={{ padding:"4px 22px 0" }}>
+        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:30, fontWeight:900, color:C.white, lineHeight:1.15, marginBottom:4 }}>Draw My Group</div>
+        <div style={{ fontSize:13, color:rgba(C.white,.45), marginBottom:20 }}>Every teen taps once — find your people</div>
+      </div>
+
+      {phase === "setup" && (
+        <div style={{ flex:1, padding:"0 22px", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center" }}>
+          <div style={{ width:"100%", background:rgba(C.white,.04), border:`1px solid ${rgba(C.white,.1)}`, borderRadius:16, padding:"20px", marginBottom:24, textAlign:"center" }}>
+            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:rgba(C.white,.4), marginBottom:12 }}>Number of Groups</div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:20 }}>
+              <button onClick={() => setNumGroups(n => Math.max(2, n-1))} style={{ width:44, height:44, borderRadius:"50%", border:`1px solid ${rgba(C.white,.2)}`, background:"none", color:C.white, fontSize:22, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>−</button>
+              <div style={{ fontFamily:"'Playfair Display',serif", fontSize:52, fontWeight:900, color:C.gold, minWidth:60, textAlign:"center" }}>{numGroups}</div>
+              <button onClick={() => setNumGroups(n => Math.min(12, n+1))} style={{ width:44, height:44, borderRadius:"50%", border:`1px solid ${rgba(C.white,.2)}`, background:"none", color:C.white, fontSize:22, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>+</button>
+            </div>
+            <div style={{ fontSize:12, color:rgba(C.white,.3), marginTop:8 }}>Default: 10 groups</div>
+          </div>
+          <button onClick={spin} style={{ width:"100%", maxWidth:320, padding:"20px", borderRadius:16, border:"none", background:`linear-gradient(135deg,${C.gold} 0%,${C.goldLight} 100%)`, color:C.navy, fontSize:18, fontWeight:700, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+            🎲 Draw My Group!
+          </button>
+          <div style={{ fontSize:12, color:rgba(C.white,.3), marginTop:12, textAlign:"center" }}>Everyone taps on their own phone</div>
+        </div>
+      )}
+
+      {phase === "spinning" && (
+        <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ width:160, height:160, borderRadius:"50%", background:rgba(C.gold,.15), border:`3px solid ${rgba(C.gold,.4)}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:72, fontWeight:900, color:C.gold }}>{displayNum}</div>
+          </div>
+          <div style={{ marginTop:20, fontSize:13, color:rgba(C.white,.4), letterSpacing:2, textTransform:"uppercase" }}>Drawing…</div>
+        </div>
+      )}
+
+      {phase === "result" && result && (
+        <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"0 24px 40px" }}>
+          <div style={{ width:170, height:170, borderRadius:"50%", background:rgba(groupColor,.15), border:`4px solid ${groupColor}`, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", marginBottom:20, animation:"scaleIn .35s ease" }}>
+            <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:groupColor, marginBottom:4 }}>Group</div>
+            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:80, fontWeight:900, color:C.white, lineHeight:1 }}>{result}</div>
+          </div>
+          <div style={{ textAlign:"center", marginBottom:20 }}>
+            <div style={{ fontSize:16, fontWeight:700, color:C.white, marginBottom:6 }}>You're in Group {result}!</div>
+            <div style={{ fontSize:13, color:rgba(C.white,.5), lineHeight:1.6 }}>Find everyone else showing <strong style={{ color:groupColor }}>Group {result}</strong> and sit together.</div>
+          </div>
+          {scenario && (
+            <div style={{ width:"100%", background:rgba(groupColor,.08), border:`1px solid ${rgba(groupColor,.25)}`, borderRadius:14, padding:"14px 18px", textAlign:"center", marginBottom:20 }}>
+              <div style={{ fontSize:10, fontWeight:700, letterSpacing:1.5, textTransform:"uppercase", color:groupColor, marginBottom:6 }}>Your Scenario</div>
+              <div style={{ fontSize:14, color:C.white, lineHeight:1.55 }}>{scenario.text}</div>
+            </div>
+          )}
+          <button onClick={() => { setPhase("setup"); setResult(null); }} style={{ width:"100%", padding:"16px", borderRadius:14, border:`1px solid ${rgba(C.white,.15)}`, background:rgba(C.white,.06), color:rgba(C.white,.6), fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
+            🎲 Draw Again
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── GROUP ROLES ─────────────────────────────────────────────────────
 function GroupRolesScreen({ onBack }) {
   return (
@@ -678,7 +777,7 @@ function EcosystemScreen({ onBack }) {
 
   return (
     <div style={{ background:C.navyDeep, minHeight:"100vh", paddingBottom:48 }}>
-      <button onClick={()=>setStep(ROLES.length-1)} style={{ background:"none", border:"none", cursor:"pointer", color:rgba(C.white,.35), fontSize:13, fontWeight:600, padding:"18px 22px 10px", fontFamily:"'DM Sans',sans-serif" }}>← Edit</button>
+      <button onClick={onBack} style={{ background:"none", border:"none", cursor:"pointer", color:rgba(C.white,.42), fontSize:13, fontWeight:600, padding:"18px 22px 10px", display:"block", fontFamily:"'DM Sans',sans-serif" }}>← Home</button>
       <div style={{ padding:"4px 20px 0" }}>
         <div style={{ background:`linear-gradient(145deg,${C.navyMid} 0%,${C.navy} 100%)`, border:`1px solid ${rgba(C.gold,.22)}`, borderRadius:20, padding:"24px 20px", marginBottom:16, animation:"scaleIn .3s ease" }}>
           <div style={{ textAlign:"center", marginBottom:20, paddingBottom:16, borderBottom:`1px solid ${rgba(C.white,.07)}` }}>
@@ -765,26 +864,6 @@ function PocketCardScreen({ onBack }) {
         <div style={{ textAlign:"center", marginTop:8, fontSize:12, color:rgba(C.white,.3) }}>
           or 📸 screenshot the card above to save
         </div>
-
-        {/* QR Test Section */}
-        <div style={{ marginTop:24, background:rgba(C.white,.04), border:`1px solid ${rgba(C.white,.1)}`, borderRadius:16, padding:"20px", textAlign:"center" }}>
-          <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:rgba(C.gold,.8), marginBottom:14 }}>QR Code Test</div>
-          <div style={{ background:C.gold, borderRadius:12, padding:10, display:"inline-block", marginBottom:12 }}>
-            <img src={qrUrl} alt="QR Code" style={{ width:120, height:120, display:"block", borderRadius:6 }} onError={e=>{ e.target.style.display="none"; }}/>
-          </div>
-          <div style={{ fontSize:12, color:rgba(C.white,.55), lineHeight:1.65, marginBottom:8 }}>
-            Scan to test the app link<br/>
-            <span style={{ color:rgba(C.gold,.7), fontWeight:600 }}>{APP_URL}</span>
-          </div>
-          <div style={{ fontSize:11, color:rgba(C.white,.28), background:rgba(C.coral,.1), border:`1px solid ${rgba(C.coral,.25)}`, borderRadius:8, padding:"8px 12px", textAlign:"left" }}>
-            ⚠️ Update <code style={{ color:C.coral, fontSize:11 }}>APP_URL</code> at the top of the file once deployed to Netlify — the QR updates automatically.
-          </div>
-        </div>
-
-        {toast && (
-          <div style={{ position:"fixed", bottom:32, left:"50%", transform:"translateX(-50%)", background:C.teal, color:C.white, fontSize:13, fontWeight:700, padding:"10px 24px", borderRadius:24, boxShadow:"0 4px 20px rgba(0,0,0,.4)", zIndex:999, animation:"scaleIn .2s ease" }}>
-            {toast}
-          </div>
         )}
       </div>
     </div>
